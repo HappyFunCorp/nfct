@@ -3,13 +3,7 @@ pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
 
-contract Appender {
-    function append(string memory a, string memory b) public pure returns (string memory) {
-        return string(abi.encodePacked(a, b));
-    }
-}
-
-contract Greeter {
+contract CodeCaller {
     string private greeting;
     address private subContractAddress;
     string private subContractAbiSignature;
