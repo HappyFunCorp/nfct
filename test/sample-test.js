@@ -1,6 +1,7 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
+
 describe("Greeter", function () {
   it("Should return the new greeting once it's changed", async function () {
     const Greeter = await hre.ethers.getContractFactory("Greeter");
@@ -10,8 +11,7 @@ describe("Greeter", function () {
 
     expect(await greeter.greet()).to.equal("Hello, Hardhat!");
 
-    await greeter.createAdder();
-    await greeter.createAdder();
+    await greeter.createAdder("add(uint256,uint256)");
     const setGreetingTx = await greeter.setGreeting("Hola, mundo!");
 
     // wait until the transaction is mined
