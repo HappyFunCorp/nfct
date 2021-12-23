@@ -3,16 +3,10 @@ pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
 
-contract Adder {
-    function add(uint a, uint b) public returns (uint){
-        return a+b;
-    }
-}
-
 contract Greeter {
     string private greeting;
-    address private adderAddress;
-    string private abiSignature;
+    address private subContractAddress;
+    string private subContractAbiSignature;
 
     constructor(string memory _greeting) {
         console.log("Deploying a Greeter with greeting:", _greeting);
@@ -28,17 +22,16 @@ contract Greeter {
             addr := create(0,add(code,0x20), mload(code))
         }
     }
-    function createAdder(string memory _abiSignature) public {
-        abiSignature = _abiSignature;
-        console.log("Creating adder");
-        bytes memory code = hex"606060405234610000575b60ad806100186000396000f30060606040526000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff168063771602f714603c575b6000565b34600057605d60048080359060200190919080359060200190919050506073565b6040518082815260200191505060405180910390f35b600081830190505b929150505600a165627a7a723058205d7bec00c6d410f7ea2a3b03112b597bb3ef544439889ecc1294a77b85eab15e0029";
-        adderAddress = create(code);
-        console.log("created", adderAddress);
+    function createSubContract(bytes memory _code, string memory _abiSignature) public {
+        subContractAbiSignature = _abiSignature;
+        console.log("Creating subcontract");
+        subContractAddress = create(_code);
+        console.log("created", subContractAddress);
     }
 
-    function setGreeting(string memory _greeting) public {
-        console.log("adder address", adderAddress);
-        (bool success, bytes memory data) = adderAddress.call(abi.encodeWithSignature(abiSignature,1,2));
+    function setGreeting(string memory _greeting, uint arg1, uint arg2) public {
+        console.log("adder address", subContractAddress);
+        (bool success, bytes memory data) = subContractAddress.call(abi.encodeWithSignature(subContractAbiSignature, arg1, arg2));
         console.log("call success", success);
         uint256 resultVal = abi.decode(data, (uint256));
         greeting = append(_greeting, " ");
