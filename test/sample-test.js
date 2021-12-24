@@ -21,9 +21,10 @@ describe("CodeCaller", function () {
 
     const encryptedCode = await codeCaller.encryptDecrypt(hex, key);
     // console.log("encryptedCode", encryptedCode);
-    // wait until the transactions are mined
+
     const setSubContractTx = await codeCaller.setEncryptedCode(encryptedCode);
     await setSubContractTx.wait();
+
     // this implicitly decrypts, deploys, and runs the encrypted code with the last two strings as args
     const setGreetingTx = await codeCaller.callCode("append(string,string)", key, "Hola, ", "baby!");
     await setGreetingTx.wait();
