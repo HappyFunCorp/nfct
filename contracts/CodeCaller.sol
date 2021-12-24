@@ -3,14 +3,14 @@ pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
 
+// obvious TODO: restrict calls to owner of NFCT
+
 contract CodeCaller {
     string private greeting;
-    address private subContractAddress;
-    string private subContractAbiSignature;
     bytes private encryptedCode;
 
     constructor(string memory _greeting) {
-        console.log("Deploying a Greeter with greeting:", _greeting);
+        console.log("Deploying a CodeCaller with greeting:", _greeting);
         greeting = _greeting;
     }
 
@@ -29,17 +29,12 @@ contract CodeCaller {
         }
     }
 
-    function createSubContract(string memory _abiSignature, bytes memory _key) public {
+    function callCode(string memory _abiSignature, bytes memory _key, string memory arg1, string memory arg2) public {
         console.log("Creating subcontract", _abiSignature);
-        subContractAbiSignature = _abiSignature;
         bytes memory subContractCode = encryptDecrypt(encryptedCode, _key);
-        subContractAddress = create(subContractCode);
+        address subContractAddress = create(subContractCode);
         console.log("created", subContractAddress);
-    }
-
-    function setGreeting(string memory arg1, string memory arg2) public {
-        console.log("adder address", subContractAddress);
-        (bool success, bytes memory data) = subContractAddress.call(abi.encodeWithSignature(subContractAbiSignature, arg1, arg2));
+        (bool success, bytes memory data) = subContractAddress.call(abi.encodeWithSignature(_abiSignature, arg1, arg2));
         console.log("call success", success);
         greeting = abi.decode(data, (string));
         console.log("new greeting", greeting);
