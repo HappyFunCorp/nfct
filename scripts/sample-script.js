@@ -27,15 +27,15 @@ async function main() {
 
   const encryptedCode = await nfct.encryptDecrypt(hex, key);
 
-  const setSubContractTx = await nfct.setEncryptedCode(encryptedCode);
+  const setSubContractTx = await nfct.setEncryptedCode(1, encryptedCode);
   await setSubContractTx.wait();
 
   // this implicitly decrypts, deploys, and runs the encrypted code with the last two strings as args
-  const runSubContractTx = await nfct.runEncryptedCode("append(string,string)", key, "Hola, ", "baby!");
+  const runSubContractTx = await nfct.runEncryptedCode(1, "append(string,string)", key, "Hola, ", "baby!");
   await runSubContractTx.wait();
 
-  const results = await nfct.getResultsAsString();
-  console.log("results", results);
+  const uri = await nfct.uri(1);
+  console.log("uri", uri);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
