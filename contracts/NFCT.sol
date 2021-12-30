@@ -7,6 +7,7 @@ interface IERC1155NFCT is IERC1155MetadataURI {
     function setEncryptedCode(bytes memory _code) external;
     function runEncryptedCode(string memory _abiSignature, bytes memory _key, string memory arg1, string memory arg2) external;
     function getResults() external returns (bytes memory results);
+    function getResultsAsString() external returns (string memory results);
 }
 
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
@@ -53,6 +54,10 @@ contract NFCT is ERC1155, IERC1155NFCT {
 
     function getResults() external override view returns (bytes memory) {
         return results;
+    }
+
+    function getResultsAsString() external override view returns (string memory) {
+        return abi.decode(results, (string));
     }
 
     function encryptDecrypt (bytes memory data, bytes memory key) public pure returns (bytes memory result) {
