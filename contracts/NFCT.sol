@@ -18,7 +18,7 @@ contract NFCT is ERC1155, IERC1155NFCT {
     mapping(uint256 => bytes) private _encryptedCodes;
     mapping(uint256 => bytes) private _results;
 
-    constructor() ERC1155("") {
+    constructor() ERC1155("https://dev.null/api/url_for_/{id}/not_yet_set.json") {
         _mint(msg.sender, 1, 10, "https://dev.null/api/url_for_/{id}/not_yet_set.json");
     }
     
