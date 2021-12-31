@@ -1,6 +1,6 @@
 # NFCTs
 
-This demonstrates an Ethereum Non-Fungible Computing Token.
+This demonstrates an Ethereum Virtual Machine Non-Fungible Computing Token.
 
 To run with Hardhat:
 
