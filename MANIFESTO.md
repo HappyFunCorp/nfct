@@ -13,7 +13,7 @@ You might expect the next sentence to include the word "eventually." However, th
 1. Basic concept: contracts can deploy other contracts, EVM bytecode is code-as-data, deploy and call on command.
 2. Security and ownership: on-chain encryption, private until run, can let ownly owner run, separate runner, anyone w password
 3. Custom data: call to proxy's delegatecall lets each NFT maintain its own data structure
-4. Limitations: decompilable after running, two string arguments, gas (although hey, maybe it's a flex)
+4. Limitations: decompilable after running, two string arguments, gas (700K to set the example, 350K to call) (although hey, maybe it's a flex)
 
 *What They're Good For*
 
