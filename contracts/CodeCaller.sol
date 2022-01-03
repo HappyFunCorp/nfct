@@ -3,24 +3,24 @@ pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
 
-// obvious TODO: restrict calls to owner of NFCT
-
 contract CodeCaller {
-    string private greeting;
-    bytes private encryptedCode;
+    string private _greeting;
+    bytes private _encryptedCode;
+    address private _subContractAddress;
 
-    constructor(string memory _greeting) {
-        console.log("Deploying a CodeCaller with greeting:", _greeting);
-        greeting = _greeting;
+    constructor(string memory greeting) {
+        console.log("Deploying a CodeCaller with greeting:", greeting);
+        _greeting = greeting;
     }
 
     function greet() public view returns (string memory) {
-        return greeting;
+        return _greeting;
     }
 
-    function setEncryptedCode(bytes memory _code) public {
-        console.log("setting encrypted code, lengtH:", _code.length);
-        encryptedCode = _code;
+    function setEncryptedCode(bytes memory code) public {
+        console.log("setting encrypted code, lengtH:", code.length);
+        _encryptedCode = code;
+        _subContractAddress = address(0);
     }
 
     function create(bytes memory code) internal returns (address addr){
@@ -29,15 +29,34 @@ contract CodeCaller {
         }
     }
 
-    function callCode(string memory _abiSignature, bytes memory _key, string memory arg1, string memory arg2) public {
-        console.log("Creating subcontract", _abiSignature);
-        bytes memory subContractCode = encryptDecrypt(encryptedCode, _key);
-        address subContractAddress = create(subContractCode);
-        console.log("created", subContractAddress);
-        (bool success, bytes memory data) = subContractAddress.call(abi.encodeWithSignature(_abiSignature, arg1, arg2));
+    function callCode(string memory abiSignature, bytes memory key, string[] memory args) public {
+        console.log("Calling subcontract which hopefully has signature", abiSignature);
+        if (_subContractAddress== address(0)) {
+            bytes memory subContractCode = encryptDecrypt(_encryptedCode, key);
+            _subContractAddress = create(subContractCode);
+            console.log("created", _subContractAddress);
+        }
+        bytes memory signature;
+        if (args.length==0) {
+           signature  = abi.encodeWithSignature(abiSignature);
+        }
+        if (args.length==1) {
+            signature  = abi.encodeWithSignature(abiSignature, args[0]);
+        }
+        if (args.length==2) {
+            signature  = abi.encodeWithSignature(abiSignature, args[0], args[1]);
+        }
+        if (args.length==3) {
+            signature  = abi.encodeWithSignature(abiSignature, args[0], args[1], args[2]);
+        }
+        (bool success, bytes memory data) = _subContractAddress.call(signature);
         console.log("call success", success);
-        greeting = abi.decode(data, (string));
-        console.log("new greeting", greeting);
+        if (data.length == 0) {
+            console.log("no data");
+        } else {
+            _greeting = abi.decode(data, (string));
+            console.log("new greeting", _greeting);
+        }
     }
 
     function encryptDecrypt (bytes memory data, bytes memory key) public pure returns (bytes memory result) {

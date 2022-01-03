@@ -4,15 +4,17 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC1155/extensions/IERC1155MetadataURI.sol";
 
 interface IERC1155NFCT is IERC1155MetadataURI {
-    function setEncryptedCode(uint256 id, bytes memory _code) external;
-    function runEncryptedCode(uint256 id, string memory _abiSignature, bytes memory _key, string memory arg1, string memory arg2) external;
-    function getResults(uint256 id) external returns (bytes memory results);
+    function commitEncryptedCode(uint256 tokenId, bytes memory code) external;
+    function decryptAndDeployCode(uint256 tokenId, bytes memory key) external;
+    function runCode(uint256 tokenId, string memory abiSignature, string[] memory args) external;
+    function getResults(uint256 tokenId) external returns (bytes memory results);
+    // if it were really important to have an atomic deployAndRun method, one could be added, but seems no need
 }
 
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 
 contract NFCT is ERC1155, IERC1155NFCT {
-    mapping(uint256 => address) private _proxyAddresses;
+    mapping(uint256 => address) private _subContractAddresses;
     mapping(uint256 => bytes) private _encryptedCodes;
     mapping(uint256 => bytes) private _results;
 
@@ -21,40 +23,41 @@ contract NFCT is ERC1155, IERC1155NFCT {
         _mint(msg.sender, 2, 1, "");
     }
     
-    function setEncryptedCode(uint256 tokenId, bytes memory code) external override {
+    function commitEncryptedCode(uint256 tokenId, bytes memory code) external override {
         require(balanceOf(msg.sender, tokenId) > 0);
         _encryptedCodes[tokenId] = code;
     }
 
-    function create(bytes memory code) internal returns (address addr){
-        assembly {
-            addr := create(0,add(code,0x20), mload(code))
-        }
-    }
-
-    function createMinimalProxy(address implementation) internal returns (address result) {
-        bytes20 implementationBytes = bytes20(implementation);
-        assembly {
-            let clone := mload(0x40)
-            mstore(clone, 0x3d602d80600a3d3981f3363d3d373d3d3d363d73000000000000000000000000)
-            mstore(add(clone, 0x14), implementationBytes)
-            mstore(add(clone, 0x28), 0x5af43d82803e903d91602b57fd5bf30000000000000000000000000000000000)
-            result := create(0, clone, 0x37)
-        }
+    function decryptAndDeployCode(uint256 tokenId, bytes memory key) override public {
+        require(balanceOf(msg.sender, tokenId) > 0);
+        bytes memory subContractCode = encryptDecrypt(_encryptedCodes[tokenId], key);
+        _subContractAddresses[tokenId] = createContract(subContractCode);
     }
 
     /*
-     * optional: only let owner call this or maintain a different set of "runners" vs. "owners"
-     * e.g. require(balanceOf(msg.sender, tokenId) > 0);
-     * in either case, caller still needs the right decryption key of course
-     * Note that each token gets its own proxy contract, which can stores its own data, via the magic of delegatecall
+     * Conceivably could persist data across different code deployments, using a minimal proxy and delegatecall:
+     * https://eips.ethereum.org/EIPS/eip-1167
      * https://docs.soliditylang.org/en/v0.8.10/introduction-to-smart-contracts.html#delegatecall-callcode-and-libraries
+     * https://stackoverflow.com/questions/67464855/create-a-contract-externally
+     * Optional: maintain a different set of "runners" vs. "owners"
+     * e.g. require(_codeRunner[tokenId] == msg.sender);
     */
-    function runEncryptedCode(uint256 tokenId, string memory abiSignature, bytes memory key, string memory arg1, string memory arg2) override external {
-        bytes memory subContractCode = encryptDecrypt(_encryptedCodes[tokenId], key);
-        address subContractAddress = create(subContractCode);
-        _proxyAddresses[tokenId] = createMinimalProxy(subContractAddress);
-        (bool success, bytes memory data) = _proxyAddresses[tokenId].call(abi.encodeWithSignature(abiSignature, arg1, arg2));
+    function runCode(uint256 tokenId, string memory abiSignature, string[] memory args) override public {
+        require(balanceOf(msg.sender, tokenId) > 0); // but again note other possibilites exist...
+        bytes memory signature;
+        if (args.length==0) {
+           signature  = abi.encodeWithSignature(abiSignature);
+        }
+        if (args.length==1) {
+            signature  = abi.encodeWithSignature(abiSignature, args[0]);
+        }
+        if (args.length==2) {
+            signature  = abi.encodeWithSignature(abiSignature, args[0], args[1]);
+        }
+        if (args.length==3) {
+            signature  = abi.encodeWithSignature(abiSignature, args[0], args[1], args[2]);
+        }
+        (bool success, bytes memory data) = _subContractAddresses[tokenId].call(signature);
         if (success) {
             _results[tokenId] = data;
         }
@@ -64,7 +67,7 @@ contract NFCT is ERC1155, IERC1155NFCT {
         return _results[tokenId];
     }
 
-    // Merely a very basic example of using the computed results; in this case, as this token's new URI.
+    // Merely a very basic example of using the computed results; in this case, as this NFT's new URI.
     function uri(uint256 tokenId) public view virtual override(ERC1155, IERC1155MetadataURI) returns (string memory) {
         if (_results[tokenId].length > 0) {
             return abi.decode(_results[tokenId], (string));
@@ -91,6 +94,12 @@ contract NFCT is ERC1155, IERC1155NFCT {
             assembly {
                 mstore (add (result, add (i, 32)), chunk)
             }
+        }
+    }
+
+    function createContract(bytes memory code) internal returns (address addr){
+        assembly {
+            addr := create(0,add(code,0x20), mload(code))
         }
     }
 
