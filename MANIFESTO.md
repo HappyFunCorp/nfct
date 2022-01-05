@@ -35,7 +35,7 @@ To be clear, NFCTs were created because the concept was fun and technically inte
 3. You'd want to be careful with this, but you could probably override ERC721 or ERC1155 methods to implement some kind of per-token multisig or other script-based code to transfer token ownership, code which is secret until actually deployed/run.
 4. Completely on-chain per-NFT data, as per the last paragraph of the previous section.
 5. "Trust fall" NFTs in which one address is the "owner," another is the "runner" who can set, deploy, and run its code, and both ownership and runnership can be transferred / resold independently.
-6. As per our [reference example](./HOWTO.md), use deployed code to dynamically change the URI that a media NFT points to, thereby challenging the very concept of "art" and "token" in an appropriately avant-garde Situationist kind of way.
+6. As per our [reference example](./HOWTO.md), use deployed code to dynamically change the URI that a media NFT points to, thereby challenging the very concept of "art" (and "token") in an appropriately avant-garde Situationist kind of way.
 7. ...again, though, this is a Lego block; we expect it to fit into a whole cornucopia of projects in a wide variety of ways.
 
 
