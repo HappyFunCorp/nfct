@@ -1,6 +1,6 @@
 # HOWTO Construct a Non-Fungible Computing Token
 
-This tutorial describes how to code a [Non-Fungible Computing Token](./MANIFESTO.md). It doubles as a fairly advanced Ethereum programming tutorial; if you want to catch up on the basics, first, such as what blockchain programming entails, and how to connect to a blockchain from the web, you might want to start with our [Ethereum Programming for Web Developers](https://happyfuncorp.com/whitepapers/webthereum) tutorial.
+This tutorial describes how to code a [Non-Fungible Computing Token](./MANIFESTO.md). It doubles as a fairly advanced Ethereum programming tutorial; if you want to catch up on the basics, first, such as what blockchain programming entails, and how to connect to a blockchain from the web, you might want to start with our [Ethereum Programming for Web Developers](https://happyfuncorp.com/whitepapers/webthereum) tutorial. If you want to know _why_ we're doing this, see our [NFCT manifesto](./MANIFESTO.md).
 
 
 ## 1. Credits
@@ -266,16 +266,29 @@ Finally, use the results. Here, for example purposes, we use the results (if any
     }
 ```
 
-Voila! A non-fungible token contract for which each unique token includes, and can deploy/run, its own code. The full code, with some minor additional complexities, is here: [NFCT.sol](./contracts/NFCT.sol).
+Voila! A non-fungible token contract for which each unique token includes, and can deploy/run, its own code. The full code, with some minor additional complexities such as a separate interface definition, is here: [NFCT.sol](./contracts/NFCT.sol).
 
 ## 5. Into The Real World
 
-- any EVM blockchain; a note re energy use
-- use HardHat to deploy NFCT contract to Rinkeby
-- then to deploy and call our basic code
+This works on any EVM blockchain
+A note re energy use.
+Install Metamask.
+Select "Settings / Advanced / Show Test Network."
+Select Ropsten from the list of test networks.
+Drop your address into a Ropsten faucet e.g. https://faucet.ropsten.be/
+Export your private key - be careful if you use, or plan to use, this account for anything else!
+Update hardhat.config.js https://hardhat.org/tutorial/deploying-to-a-live-network.html#deploying-to-remote-networks
+(don't push this file to a git repo with the keys still in it!)
+Run deploy.js https://hardhat.org/tutorial/deploying-to-a-live-network.html
+Now that the NFCT contract is deployed, run nfct.js with the generated address
 
-## 6. Interfaces and Variations**
+## 6. Variations
 
-- different variants, different protocols/interfaces
+Different owner/runner - "trust fall" or gaming consortia
+Require previously embedded code to be run at least once before allowing new code to be committed
+Unencrypted code, when you want people to know what the committed code does, e.g. "this game item X will upgrade to Y"
+Different encryptDecrypt implementations
+Different argument types for the embedded code
+Use a minimum viable proxy to call contracts via delegatecall, so data persists across new code deployments
 
-
+(replace "embedded" with "committed")

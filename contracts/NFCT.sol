@@ -70,7 +70,7 @@ contract NFCT is ERC1155, IERC1155NFCT {
         return _results[tokenId];
     }
 
-    // Merely a very basic example of using the computed results; in this case, as this NFT's new URI.
+    // A very basic example of using the computed results; in this case, as this NFT's new URI.
     function uri(uint256 tokenId) public view virtual override(ERC1155, IERC1155MetadataURI) returns (string memory) {
         if (_results[tokenId].length > 0) {
             return abi.decode(_results[tokenId], (string));
