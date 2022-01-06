@@ -14,13 +14,16 @@ interface IERC1155NFCT is IERC1155MetadataURI {
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 
 contract NFCT is ERC1155, IERC1155NFCT {
-    mapping(uint256 => address) private _subContractAddresses;
     mapping(uint256 => bytes) private _encryptedCodes;
+    mapping(uint256 => address) private _subContractAddresses;
     mapping(uint256 => bytes) private _results;
 
+    uint256 public constant WORLDS_FIRST_NFCT = 1;
+    uint256 public constant WORLDS_SECOND_NFCT = 2;
+
     constructor() ERC1155("https://dev.null/api/url_for_/{id}/not_yet_set.json") {
-        _mint(msg.sender, 1, 1, "");
-        _mint(msg.sender, 2, 1, "");
+        _mint(msg.sender, 1, WORLDS_FIRST_NFCT, ""); // there's only one World's First
+        _mint(msg.sender, 2, WORLDS_SECOND_NFCT, ""); // but there are two World's Second
     }
     
     function commitEncryptedCode(uint256 tokenId, bytes memory code) external override {

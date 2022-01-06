@@ -30,8 +30,8 @@ contract AppendAndStore {
 
 describe("CodeCaller", function () {
   it("Should return the new greeting once it's changed", async function () {
-    const CodeCaller = await hre.ethers.getContractFactory("CodeCaller");
-    const codeCaller = await CodeCaller.deploy("Hello, Hardhat!");
+    const ccFactory = await hre.ethers.getContractFactory("CodeCaller");
+    const codeCaller = await ccFactory.deploy("Hello, Hardhat!");
     await codeCaller.deployed();
     console.log("CodeCaller deployed to:", codeCaller.address);
 
@@ -44,7 +44,7 @@ describe("CodeCaller", function () {
     await setSubContractTx.wait();
 
     // this implicitly decrypts, deploys, and runs the encrypted code with the last two strings as args
-    let setCallTx = await codeCaller.callCode("append(string,string)", key, ["Hola, ", "baby!"]);
+    let setCallTx = await codeCaller.callCode(key, "append(string,string)", ["Hola, ", "baby!"]);
     await setCallTx.wait();
 
     expect(await codeCaller.greet()).to.equal("Hola, baby!");
@@ -54,10 +54,10 @@ describe("CodeCaller", function () {
     setSubContractTx = await codeCaller.setEncryptedCode(encryptedCode);
     await setSubContractTx.wait();
 
-    setCallTx = await codeCaller.callCode("assemble(string,string)", key, ["Hola, ", "baby2!"]);
+    setCallTx = await codeCaller.callCode(key, "assemble(string,string)", ["Hola, ", "baby2!"]);
     await setCallTx.wait();
 
-    setCallTx = await codeCaller.callCode("assembled()", key, []);
+    setCallTx = await codeCaller.callCode(key, "assembled()", []);
     await setCallTx.wait();
 
     expect(await codeCaller.greet()).to.equal("Hola, baby2!");

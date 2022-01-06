@@ -29,13 +29,17 @@ contract CodeCaller {
         }
     }
 
-    function callCode(string memory abiSignature, bytes memory key, string[] memory args) public {
+    function callCode(bytes memory key, string memory abiSignature, string[] memory args) public {
+
+        // Decrypt and deploy
         console.log("Calling subcontract which hopefully has signature", abiSignature);
         if (_subContractAddress== address(0)) {
-            bytes memory subContractCode = encryptDecrypt(_encryptedCode, key);
-            _subContractAddress = create(subContractCode);
+            bytes memory subContractCode = encryptDecrypt(_encryptedCode, key); // decrypt
+            _subContractAddress = create(subContractCode); // deploy
             console.log("created", _subContractAddress);
         }
+
+        // Run 
         bytes memory signature;
         if (args.length==0) {
            signature  = abi.encodeWithSignature(abiSignature);
@@ -51,6 +55,8 @@ contract CodeCaller {
         }
         (bool success, bytes memory data) = _subContractAddress.call(signature);
         console.log("call success", success);
+
+        // Pass back the data
         if (data.length == 0) {
             console.log("no data");
         } else {
