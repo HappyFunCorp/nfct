@@ -52,7 +52,7 @@ Go to the `artifacts/contracts/Greeter.sol` directory, and you'll find a file "A
 
 NFCTs don't just store bytecode, though; they store _encrypted_ bytecode. (Otherwise, since blockchains are public, anyone would be able to see, duplicate, simulate, and run the code in question, so the NFCT wouldn't really "own" it. In some use cases that's fine, but code which is secret until run is more fun.) As such, we need to be able to encrypt this bytecode, and then, crucially, decrypt it _on-chain_.
 
-Fortunately this is not as hard as it sounds. We'll simply use this symmetric `encryptDecrypt` method (from one of the StackExchange answers above) to use a password (aka "key") and the magic of XOR for encryption and decryption. The method in full is
+Fortunately this is not as hard as it sounds. We can just use this symmetric `encryptDecrypt` method (from one of the StackExchange answers above) to use a password (aka "key") and implements a secure [CTR block cipher](https://crypto.stackexchange.com/questions/1656/is-sha-256-secure-as-a-ctr-block-cipher) for encryption and decryption. The method in full is
 ```
 function encryptDecrypt (bytes memory data, bytes memory key) public pure returns (bytes memory result) {
     uint256 length = data.length;
@@ -76,7 +76,7 @@ function encryptDecrypt (bytes memory data, bytes memory key) public pure return
     }
 }
 ```
-Obviously other encryption implementations exist, but that should generally do for our purposes.
+Obviously other encryption implementations exist, but the above is simple, efficient, and secure.
 
 ### Calling the Blockchain
 
