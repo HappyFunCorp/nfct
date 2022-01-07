@@ -11,8 +11,8 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
   }
 });
 
-// You need to export an object to set up your config
-// Go to https://hardhat.org/config/ to learn more
+const ALCHEMY_API_KEY = "KEY";
+const ROPSTEN_PRIVATE_KEY = "YOUR ROPSTEN PRIVATE KEY";
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
@@ -24,5 +24,11 @@ module.exports = {
     currency: 'USD',
     gasPrice: 63,
     coinmarketcap: ""
+  },
+  networks: {
+    ropsten: {
+      url: `https://eth-ropsten.alchemyapi.io/v2/${ALCHEMY_API_KEY}`,
+      accounts: [`${ROPSTEN_PRIVATE_KEY}`]
+    }
   }
 };
