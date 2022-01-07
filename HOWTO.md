@@ -28,11 +28,11 @@ That sample project is a Greeter contract (full source [available](https://hardh
 
 ## 3. An Example Of Code Deploying New Code
 
-Thus far we just have a boilerplate Hardhat install. Now it gets interesting. We're going to take that sample Greeter contract and turn it into _code which contains, deploys, and runs new on-chain code_, the heart of the NFCT concept. `Greeter.sol` will become `CodeCaller.sol`, and we'll "embed" new code within that contract, as an encrypted blob of data, then decrypt, deploy, and run that embedded code.
+Thus far we just have a boilerplate Hardhat install. Now it gets interesting. We're going to take that sample Greeter contract and turn it into _code which contains, deploys, and runs new on-chain code_, the heart of the NFCT concept. `Greeter.sol` will become `CodeCaller.sol`, and we'll "embed" or "commit" new code within that contract, as an encrypted blob of data, then decrypt, deploy, and run that committed code.
 
 ### Generating Bytecode
 
-Storing code as data is straightforward, because all EVM contracts compile to [bytecode](https://en.wikipedia.org/wiki/Bytecode). First we generate the bytecode for the contract we're going to embed. Here it's a very basic string concatenator:
+Storing code as data is straightforward, because all EVM contracts compile to [bytecode](https://en.wikipedia.org/wiki/Bytecode). First we generate the bytecode for the contract we're going to embed/commit. Here it's a very basic string concatenator:
 
 ```
 contract Appender {
@@ -80,7 +80,7 @@ Obviously other encryption implementations exist, but the above is simple, effic
 
 ### Calling the Blockchain
 
-Let's turn our attention briefly to the JavaScript which orchestrates this all -- in our case, the `test.js` contract. It will deploy the CodeCaller contract; encrypt the new embedded code; then pass that encrypted blob to the CodeCaller. To do so it uses the [ethers](https://docs.ethers.io/v5/) library that Hardhat makes available (`ethers` is to `web3` as `hardhat` is to `truffle`).
+Let's turn our attention briefly to the JavaScript which orchestrates this all -- in our case, the `test.js` contract. It will deploy the CodeCaller contract; encrypt the new committed code; then pass that encrypted blob to the CodeCaller. To do so it uses the [ethers](https://docs.ethers.io/v5/) library that Hardhat makes available (`ethers` is to `web3` as `hardhat` is to `truffle`).
 
 ```
 const { ethers } = require("hardhat");
@@ -102,9 +102,9 @@ function setEncryptedCode(bytes memory code) public {
 }
 ```
 
-### Running the Embedded Code
+### Running the Committed Code
 
-OK, we've embedded the encrypted code. Now it's time to actually _run_ it. This is a four-phase process -- decrypt the code; deploy that code to the blockchain as a new contract; invoke that contract's function(s); and use any results it generates -- but for this simple example, we'll roll all those phases together into a single method: `callCode`. It's probably worth stepping through it almost line-by-line. First, though, a quick aside: let's talk about
+OK, we've committed the encrypted code. Now it's time to actually _run_ it. This is a four-phase process -- decrypt the code; deploy that code to the blockchain as a new contract; invoke that contract's function(s); and use any results it generates -- but for this simple example, we'll roll all those phases together into a single method: `callCode`. It's probably worth stepping through it almost line-by-line. First, though, a quick aside: let's talk about
 
 #### Contract Creation
 ```
@@ -123,7 +123,7 @@ Now back to our own custom contract, and its beating heart, the `callCode` metho
 function callCode(bytes memory key, string memory abiSignature, string[] memory args) public {
 ```
 
-The `key` is, of course, our encryption/decryption password. The `abiSignature` is a little more complex. Once we deploy the embedded code as a new contract, we want to call one or more of its functions. To do so, we'll need to know what that function signature is, i.e. what arguments it receives. That's its *abiSignature*, which is a string, in this case `append(string,string)`. Finally, `args` is a string array of which will be pass on to the function in question as its arguments. To see how those are handled, see below...
+The `key` is, of course, our encryption/decryption password. The `abiSignature` is a little more complex. Once we deploy the committed code as a new contract, we want to call one or more of its functions. To do so, we'll need to know what that function signature is, i.e. what arguments it receives. That's its *abiSignature*, which is a string, in this case `append(string,string)`. Finally, `args` is a string array of which will be pass on to the function in question as its arguments. To see how those are handled, see below...
 
 #### Decrypt and Deploy
 ```
@@ -167,7 +167,7 @@ This is pretty straightforward (though in production you'd want to strip out Har
 
 #### The Full Source Code
 
-The complete code (including test assertions, console.log statements, and some slight extra complexity around resetting the subContractAddress between deploying two different embedded functions) is available, of course:
+The complete code (including test assertions, console.log statements, and some slight extra complexity around resetting the subContractAddress when new code is committed) is available, of course:
 - [CodeCaller.sol](./contracts/CodeCaller.sol)
 - [test.js](./test/test.js)
 
@@ -213,7 +213,7 @@ contract NFCT is ERC1155, IERC1155NFCT {
     }
 ```
 
-Next, we basically repurpose the CodeCaller code, but for greater flexibility, divide the four phases of NFCT invocation into four separate methods. First, storing new embedded code, which only the token's owner is allowed to do:
+Next, we basically repurpose the CodeCaller code, but for greater flexibility, divide the four phases of NFCT invocation into four separate methods. First, storing new committed code, which only the token's owner is allowed to do:
 
 ```
     function commitEncryptedCode(uint256 tokenId, bytes memory code) external override {
@@ -255,7 +255,7 @@ Third, running the deployed code. Here, only the owner can call the code, but no
     }
 ```
 
-Finally, use the results. Here, for example purposes, we use the results (if any) to override the `uri` function, so the embedded code is used to change the NFT's metadata on the fly. For other potential use cases see the [MANFESTO](./MANIFESTO.md).
+Finally, use the results. Here, for example purposes, we use the results (if any) to override the `uri` function, so the committed code is used to change the NFT's metadata on the fly. For other potential use cases see the [MANFESTO](./MANIFESTO.md).
 ```
     // A very basic example of using the computed results; in this case, as this NFT's new URI.
     function uri(uint256 tokenId) public view virtual override(ERC1155, IERC1155MetadataURI) returns (string memory) {
@@ -270,25 +270,32 @@ Voila! A non-fungible token contract for which each unique token includes, and c
 
 ## 5. Into The Real World
 
-This works on any EVM blockchain
-A note re energy use.
-Install Metamask.
-Select "Settings / Advanced / Show Test Network."
-Select Ropsten from the list of test networks.
-Drop your address into a Ropsten faucet e.g. https://faucet.ropsten.be/
-Export your private key - be careful if you use, or plan to use, this account for anything else!
-Update hardhat.config.js https://hardhat.org/tutorial/deploying-to-a-live-network.html#deploying-to-remote-networks
+NFCTs should run on any Ethereum Virtual Machine blockchain; we'll demonstrate this example working on the Ropsten testnet.
+
+### A Note Re Energy Efficiency
+
+NFTs, and cryptocurrencies in general, have attracted a lot of criticism because of the energy they consume. This criticism generally seems valid, to us; that energy consumption is a huge externality. However, what the critics may not appreciate is that most EVM blockchains run on extremely energy-efficient Proof-of-Stake consensus ... and soon, Ethereum itself will do the same, reducing its energy consumption by an estimated [99.95%](https://blog.ethereum.org/2021/05/18/country-power-no-more/).
+
+### How to Deploy to a Real Live Blockchain
+
+1. Install [Metamask](https://metamask.io/), create an account, log in.
+2. From its menu, select "Settings / Advanced / Show Test Network." Select Ropsten from the list of test networks.
+3. Copy your Metamask account address into a Ropsten "faucet," which will send (test/fake) ether to your address. You need to spend this ether as "gas" to do anything on the blockchain.
+4. Go to https://www.alchemyapi.io, sign up, from its dashboard create a new App, and get its App Key.
+5.  [Export your private key](https://metamask.zendesk.com/hc/en-us/articles/360015289632-How-to-Export-an-Account-Private-Key) -- and be very very careful with it if you use, or plan to use, this account for anything else! That private key grants full & complete access to your account.
+6. Update your `hardhat.config.js` with the Alchemy key and your Metamask account private key, per [the Hardhat docs](https://hardhat.org/tutorial/deploying-to-a-live-network.html#deploying-to-remote-networks). Make sure you don't push `hardhat.config.js` to a git repo with the keys still in it!
+7. Run `npx hardhat run scripts/nfct-deploy-contract.js` per [the Hardhat docs](https://hardhat.org/tutorial/deploying-to-a-live-network.html), again. This will return the Ropsten address that the NFCT contract has been deployed to. You'll need to know that address to interact with yor NFCTs.
+8. Congratulations, you have deployed your master NFCT contract to a real live blockchain! Now, do what they do; commit encrypted code into a token, with `npx hardhat run scripts/nfct-commit-code.js [ropsten_address]`.
+9. Finally, decrypt / deploy / run this code with `npx hardhat run scripts/nfct-run-code.js [ropsten_address]`.
 (don't push this file to a git repo with the keys still in it!)
-Run deploy.js https://hardhat.org/tutorial/deploying-to-a-live-network.html
-Now that the NFCT contract is deployed, run nfct.js with the generated address
+10. Voila! You have created an NFCT, committed code to it, and then deployed & run that code, in the real world.
 
 ## 6. Variations
 
-Different owner/runner - "trust fall" or gaming consortia
-Require previously embedded code to be run at least once before allowing new code to be committed
-Unencrypted code, when you want people to know what the committed code does, e.g. "this game item X will upgrade to Y"
-Different encryptDecrypt implementations
-Different argument types for the embedded code
-Use a minimum viable proxy to call contracts via delegatecall, so data persists across new code deployments
+What's described above is a fairly basic version of an NFCTs. Other variations could easiliy be constructed, including:
 
-(replace "embedded" with "committed")
+1. NFCTs which distinguish between their _owner_, their _committer_ (the address(es) which can commit new code), and their _runner_ (the address(es) which can deploy/run the committed code.) One variant is the "trust fall" NFCT, where two or three maintain separate control over its diferent aspects. Another is the "gaming consortium" one, e.g. a gaming item which a player owns, and the player can run the committed code when they get the password, but a consortium of games who support cross-game NFTs control the item's "upgrade path" by dictating what code is committed to it.
+2. Obviously you could get rid of the encryption / decryption stage; this would let you show / guarantee what committed code does. (You could still require a password to deploy and run the committed code.)
+3. It would be easy to strengthen the, well, commitment of committed code, by writing an NFCT that required previously committed code to be run at least once (or, for that matter, N times) before new code could be committed to it. Note however this would mean that if the decryption password were lost, the NFCT in question would be, essentially, bricked.
+4. The hack-iest thing about the current NFCT implementation is that it supports a single array of 0 to 3 strings as arguments to the deployed code. For the sake of efficiency, if nothing else, this could be tweaked.
+5. It should be possible for each NFCT to maintain its own data -- which can be edited by its deployed code, _across different code deployments and invocations_ -- by maintaining a per-token [Minimal Proxy Contract](https://eips.ethereum.org/EIPS/eip-1167) which makes use of the magic of [delegatecall](https://docs.soliditylang.org/en/v0.8.10/introduction-to-smart-contracts.html#delegatecall-callcode-and-libraries). This would be tricky, but should be doable, and opens up a panoply of potentially interesting possibilities.
