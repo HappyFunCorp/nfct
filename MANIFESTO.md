@@ -28,10 +28,10 @@ A theoretical concept worth noting is that it should be possible for each NFCT t
 
 To be clear, NFCTs were created because the concept was fun and technically interesting, not as a solution to any particular problem. Furthermore, we view them more as a new kind of Lego block than a completed edifice. That said, we can handwave some ideas of how they might be used:
 
-1. "Mystery loot" NFTs, whose contents have been committed to the chain in the form of code, but aren't revealed until the password is distributed, the code is run, and the data it generates is written.
+1. "Mystery loot" NFTs, whose contents have been committed to the chain in the form of code, but aren't revealed until the password is distributed, the code is run, and the data it generates is written. This data could even be dynamic based on runtime oracle values, block number, etc.
 2. In general, game and especially _cross-game_ NFTs are the most obvious use case. NFCTs could be in-game items with committed "ugrade paths," wherein if you find the password in the game, you can then activate the upgrade code. This could even be done _cross-game_, wherein a consortium of games would follow an understood data protocol such that an upgrade in Game A would also be reflected in Game B. In such a case, the player would _own_ the NFT, but only consortium members could deploy new "item upgrades." (Here, encryption might not be necessary, and the commitment step could be used to ensure consortium approval.)
-3. You'd want to be careful with this, but you could probably override ERC721 or ERC1155 methods to implement some kind of per-token multisig or other script-based code to transfer token ownership, code which is secret until actually deployed/run.
-4. Completely on-chain per-NFT data, as per the last paragraph of the previous section.
+3. You'd want to be careful with this, but you could probably override ERC721 or ERC1155 methods to implement some kind of per-token multisig or other script-based code to transfer token ownership -- code which is secret until actually deployed/run.
+4. Completely on-chain custom per-NFT data, as per the last paragraph of the previous section.
 5. "Trust fall" NFTs in which one address is the "owner," another is the "runner" who can set, deploy, and run its code, and both ownership and runnership can be transferred / resold independently.
 6. As per our [reference example](./HOWTO.md), use deployed code to dynamically change the URI that a media NFT points to, thereby challenging the very concept of "art" (and "token") in an appropriately avant-garde Situationist kind of way.
 7. ...again, though, this is really a new kind of Lego block; we expect it to fit into a whole cornucopia of projects in a wide variety of ways.
