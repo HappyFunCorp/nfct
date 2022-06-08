@@ -150,7 +150,7 @@ Fairly straightforward; we call the same `encryptDecrypt` method as before, to t
     }
     (bool success, bytes memory data) = _subContractAddress.call(signature);
 ```
-This is a bit crude and hack-y but there's no easy way around it; we need to encode the function call in a way that the EVM understands, and since we don't know in advance how many arguments there are, we do so with an if tree. Needless to say you could rewrite this as a `switch`, or add an `args.length==4` if you needed that nany, etc. Honestly though three seems ample.
+This is a bit crude and hack-y but there's no easy way around it; we need to encode the function call in a way that the EVM understands, and since we don't know in advance how many arguments there are, we do so with an if tree. Needless to say you could rewrite this as a `switch`, or add an `args.length==4` if you needed that many, etc. Honestly though three seems ample.
 
 You may be thinking: why an array of *strings*? What if I just want to pass UINTs or bools or whatever? You're entirely right. A limitation of this kind of dynamic code is that you have to decide the argument type(s) in advance, which limits flexibility. For the purpose of this example, this is fine, but for real-world NFCTs where efficiency matters, one might want to improve on this by e.g. having one array of *strings* or *bytes* and one of *uints* -- that should cover most cases. It depends to an extent on the purpose of the NFCT in question.
 
