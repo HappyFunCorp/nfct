@@ -2,7 +2,7 @@
 
 ## Introduction
 
-In September 2017, Entriken, Shirley, Evans, & Sachs introduced [Ethereum Improvement Proposal 721](https://eips.ethereum.org/EIPS/eip-721), which gave the world a new form of digital entity: the _non-fungible token_, or NFT. After an initial, brief, [CryptoKitty-fuelled](https://techcrunch.com/2017/12/03/people-have-spent-over-1m-buying-virtual-cats-on-the-ethereum-blockchain/) excitement died down, NFTs roared back with a vengeance in 2021 -- a vengeance which erupted into a mania which built to [pure full-fledged insanity](https://www.theverge.com/2021/12/30/22860010/bored-ape-yacht-club-payc-phayc-copycat-nft).
+In September 2017, Entriken, Shirley, Evans (no relation), & Sachs introduced [Ethereum Improvement Proposal 721](https://eips.ethereum.org/EIPS/eip-721), which gave the world a new form of digital entity: the _non-fungible token_, or NFT. After an initial, brief, [CryptoKitty-fuelled](https://techcrunch.com/2017/12/03/people-have-spent-over-1m-buying-virtual-cats-on-the-ethereum-blockchain/) excitement died down, NFTs roared back with a vengeance in 2021 -- a vengeance which erupted into a mania which built to [pure full-fledged insanity](https://www.theverge.com/2021/12/30/22860010/bored-ape-yacht-club-payc-phayc-copycat-nft).
 
 Despite this ongoing madness, we at [HappyFunCorp](https://happyfuncorp.com/) maintain the provocative and contrarian stance that today's NFTs are _far_ too boring. Today we introduce an entirely new, more fun, less boring NFT variant: the Non-Fungible Computing Token.
 
